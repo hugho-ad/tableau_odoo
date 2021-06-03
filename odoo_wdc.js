@@ -74,23 +74,23 @@
         common(url, 'authenticate', user, pass, db, {}).then(function(uids) {
             var uid = uids[0]
             exec(url, 'execute_kw', uid, pass, db,
-            'ir.model', 'search_read', [[['transient', '=', false]]], {'fields': ['name', 'model'], 'limit': 20}).then(function(models) {
+            'ir.model', 'search_read', [[['transient', '=', false], ['x_tableau_get', '=', true]]], {'fields': ['name', 'model']}).then(function(models) {
                 console.log(models);
                 exec(url, 'execute_kw', uid, pass, db,
                     'ir.model.fields', 'search_read',
-                    [[['model_id.transient', '=', false], ['ttype', 'not in', exclude_fields]]],
+                    [[['model_id.transient', '=', false], ['ttype', 'not in', exclude_fields], ['model_id.x_tableau_get', '=', true]]],
                     {'fields': ['name', 'ttype', 'field_description', 'help', 'model_id']}).then(function (fields) {
                     console.log(fields)
                     var tableSchema = models[0].map(
                         model => ({
-                            id: model.model.replaceAll('.', '_'),
+                            id: model.model.replace(/\./g,'_'),
                             alias: model.model,
                             description: model.name,
                             columns: fields[0].filter(item => item.model_id[0] == model.id).map(
                                 field => ({
                                     id: field.name,
                                     alias: field.field_description,
-                                    description: field.help,
+                                    description: field.help ? field.help : '',
                                     dataType: types_map[field.ttype],
                                 })
                             )
@@ -99,13 +99,13 @@
                     console.log(tableSchema);
                     schemaCallback(tableSchema);
                 }).catch(function(error) {
-                    alert(error);
+                    console.log(error);
                 });
             }).catch(function(error) {
-                alert(error);
+                console.log(error);
             })
         }).catch(function(error) {
-            alert(error);
+            console.log(error);
         });
     };
 
@@ -120,7 +120,7 @@
             var uid = uids[0]
             model = table.tableInfo.alias
             exec(url, 'execute_kw', uid, pass, db, model, 'search_read', [[]],
-                {'fields': table.tableInfo.columns.map(field => field.id)}).then(function (data) {
+                {'fields': table.tableInfo.columns.map(field => field.id), limit: 1000, order: 'id desc'}).then(function (data) {
                     tableData = data[0].map(function (row) {
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
@@ -134,8 +134,11 @@
                     });
                     table.appendRows(tableData);
                     doneCallback();
-            })
-
+            }).catch(function(error) {
+                console.log(error);
+            });
+        }).catch(function(error) {
+            console.log(error);
         })
     };
 
