@@ -74,11 +74,11 @@
         common(url, 'authenticate', user, pass, db, {}).then(function(uids) {
             var uid = uids[0]
             exec(url, 'execute_kw', uid, pass, db,
-            'ir.model', 'search_read', [[['transient', '=', false], ['x_tableau_get', '=', true]]], {'fields': ['name', 'model']}).then(function(models) {
+            'ir.model', 'search_read', [[['transient', '=', false], ['tableau_get', '=', true]]], {'fields': ['name', 'model']}).then(function(models) {
                 console.log(models);
                 exec(url, 'execute_kw', uid, pass, db,
                     'ir.model.fields', 'search_read',
-                    [[['model_id.transient', '=', false], ['ttype', 'not in', exclude_fields], ['model_id.x_tableau_get', '=', true]]],
+                    [[['model_id.transient', '=', false], ['ttype', 'not in', exclude_fields], ['model_id.tableau_get', '=', true]]],
                     {'fields': ['name', 'ttype', 'field_description', 'help', 'model_id']}).then(function (fields) {
                     console.log(fields)
                     var tableSchema = models[0].map(
