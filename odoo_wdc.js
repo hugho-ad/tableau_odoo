@@ -93,7 +93,8 @@
                                     description: field.help ? field.help : '',
                                     dataType: types_map[field.ttype],
                                 })
-                            )
+                            ),
+                            incrementColumnId: "id"
                         })
                     );
                     console.log(tableSchema);
@@ -117,10 +118,12 @@
         var db = dataObj.database;
         var url = dataObj.url;
         common(url, 'authenticate', user, pass, db, {}).then(function(uids) {
+            var lastId = parseInt(table.incrementValue);
+            var domain = lastId ? [[['id', '>', lastId]]] : [[]]
             var uid = uids[0]
             model = table.tableInfo.alias
-            exec(url, 'execute_kw', uid, pass, db, model, 'search_read', [[]],
-                {'fields': table.tableInfo.columns.map(field => field.id), limit: 1000, order: 'id desc'}).then(function (data) {
+            exec(url, 'execute_kw', uid, pass, db, model, 'search_read', domain,
+                {'fields': table.tableInfo.columns.map(field => field.id), order: 'id desc'}).then(function (data) {
                     tableData = data[0].map(function (row) {
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
