@@ -117,13 +117,14 @@
         var pass =  tableau.password;
         var db = dataObj.database;
         var url = dataObj.url;
+        var limit = dataObj.limit;
         common(url, 'authenticate', user, pass, db, {}).then(function(uids) {
             var lastId = parseInt(table.incrementValue);
             var domain = lastId ? [[['id', '>', lastId]]] : [[]]
             var uid = uids[0]
             model = table.tableInfo.alias
             exec(url, 'execute_kw', uid, pass, db, model, 'search_read', domain,
-                {'fields': table.tableInfo.columns.map(field => field.id), order: 'id desc'}).then(function (data) {
+                {'fields': table.tableInfo.columns.map(field => field.id), limit: limit, order: 'id asc'}).then(function (data) {
                     tableData = data[0].map(function (row) {
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
@@ -150,10 +151,14 @@
     // Create event listeners for when the user submits the form
     $(document).ready(function() {
         $("#submitButton").click(function() {
+            var limit = $('#limit');
+            console.log(limit);
             var dataObj = {
                 url: $('#host').val().trim(),
                 database: $('#database').val().trim(),
+                limit: parseInt($('#limit').val().trim()),
             };
+            
             tableau.connectionData = JSON.stringify(dataObj);
             tableau.connectionName = "Odoo";
             tableau.username =  $('#username').val().trim();
