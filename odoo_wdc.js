@@ -20,7 +20,7 @@
         // 'many2one_reference':tableau.dataTypeEnum.,
         // 'reference':tableau.dataTypeEnum.,
         // 'one2many':tableau.dataTypeEnum.,
-        'many2one':tableau.dataTypeEnum.int,    
+        'many2one':tableau.dataTypeEnum.int,
         // 'many2many':tableau.dataTypeEnum.,
 
     };
@@ -63,7 +63,7 @@
             })
         })
     }
-    
+
     // Define the schema
     myConnector.getSchema = function (schemaCallback) {
         var dataObj = JSON.parse(tableau.connectionData);
@@ -88,8 +88,8 @@
                             description: model.name,
                             columns: fields[0].filter(item => item.model_id[0] == model.id).map(
                                 field => ({
-                                    id: field.name,
-                                    alias: field.field_description,
+                                    id: model.model.replace(/\./g,'_') + "." + field.name,
+                                    alias: model.model + " " + field.field_description,
                                     description: field.help ? field.help : '',
                                     dataType: types_map[field.ttype],
                                 })
@@ -129,6 +129,7 @@
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
                             if (Array.isArray(value)) {
+                                if (key == 'id') key = model.replace(/\./g,'_') + "." + key;
                                 row_data[key] = value[0]
                             } else {
                                 row_data[key] = value
@@ -158,7 +159,7 @@
                 database: $('#database').val().trim(),
                 limit: parseInt($('#limit').val().trim()),
             };
-            
+
             tableau.connectionData = JSON.stringify(dataObj);
             tableau.connectionName = "Odoo";
             tableau.username =  $('#username').val().trim();
