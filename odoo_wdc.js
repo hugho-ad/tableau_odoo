@@ -88,13 +88,13 @@
                             description: model.name,
                             columns: fields[0].filter(item => item.model_id[0] == model.id).map(
                                 field => ({
-                                    id: model.model.replace(/\./g,'_') + "." + field.name,
-                                    alias: model.model + " " + field.field_description,
+                                    id: model.model.replace(/\./g,'_') + "_" + field.name,
+                                    alias: model.model + "_" + field.name,
                                     description: field.help ? field.help : '',
                                     dataType: types_map[field.ttype],
                                 })
                             ),
-                            incrementColumnId: "id"
+                            incrementColumnId: model.model.replace(/\./g,'_') + "_id"
                         })
                     );
                     console.log(tableSchema);
@@ -129,7 +129,7 @@
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
                             if (Array.isArray(value)) {
-                                if (key == 'id') key = model.replace(/\./g,'_') + "." + key;
+                                if (key == 'id') key = model.replace(/\./g,'_') + "_" + key;
                                 row_data[key] = value[0]
                             } else {
                                 row_data[key] = value
