@@ -97,7 +97,7 @@
                             incrementColumnId: model.model.replace(/\./g,'_') + "_id"
                         })
                     );
-                    console.log(tableSchema);
+                    console.log('Schemas: ', tableSchema);
                     schemaCallback(tableSchema);
                 }).catch(function(error) {
                     console.log(error);
@@ -123,13 +123,20 @@
             var domain = lastId ? [[['id', '>', lastId]]] : [[]]
             var uid = uids[0]
             model = table.tableInfo.alias
+            console.log('Get DATA- Table: ', table)
+            const odoo_model = model.replace(/\./g,'_') + "_"
+            console.log(odoo_model)
+            const odoo_fields = table.tableInfo.columns.map(field => field.id.replace(
+                odoo_model, '')
+            )
+            console.log('Get DATA- Odoo Fields: ', odoo_fields)
             exec(url, 'execute_kw', uid, pass, db, model, 'search_read', domain,
-                {'fields': table.tableInfo.columns.map(field => field.id), limit: limit, order: 'id asc'}).then(function (data) {
+                {'fields': odoo_fields, limit: limit, order: 'id asc'}).then(function (data) {
                     tableData = data[0].map(function (row) {
                         var row_data = {};
                         Object.entries(row).forEach(([key, value]) => {
+                            key = odoo_model + key;
                             if (Array.isArray(value)) {
-                                if (key == 'id') key = model.replace(/\./g,'_') + "_" + key;
                                 row_data[key] = value[0]
                             } else {
                                 row_data[key] = value
